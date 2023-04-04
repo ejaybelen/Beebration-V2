@@ -10,7 +10,8 @@ import com.google.firebase.database.*
 class MainActivity : AppCompatActivity() {
 
     private lateinit var database: DatabaseReference
-    private lateinit var textViewData: TextView
+    private lateinit var textViewVoltage: TextView
+    private lateinit var textViewBatteryPercentage: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,7 +23,8 @@ class MainActivity : AppCompatActivity() {
         database = FirebaseDatabase.getInstance("https://beebration-v2-52386-default-rtdb.asia-southeast1.firebasedatabase.app/").reference
 
         // Initialize UI elements
-        textViewData = findViewById(R.id.textView_data)
+        textViewVoltage = findViewById(R.id.textView_voltage)
+        textViewBatteryPercentage = findViewById(R.id.textView_batteryPercentage)
 
         // Fetch data and listen for changes
         fetchData()
@@ -36,14 +38,25 @@ class MainActivity : AppCompatActivity() {
         dataRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 try {
-                    // Handle the data fetched from the Realtime Database
-                    val value = dataSnapshot.child("Voltage").getValue(Long::class.java)
-                    Log.d(TAG, "Value is: $value")
-                    // Update the TextView with the fetched data
-                    if (value != null) {
-                        textViewData.text = "Voltage: $value"
-                    } else {
-                        textViewData.text = "No data available"
+                    // Handle the Voltage data fetched from the Realtime Database
+                    val voltageValue = dataSnapshot.child("Voltage").getValue()
+                    Log.d(TAG, "Voltage value is: $voltageValue")
+                    // Update the TextView with the fetched Voltage data
+                    when (voltageValue) {
+                        is Long -> textViewVoltage.text = "Voltage: ${voltageValue}"
+                        is Double -> textViewVoltage.text = "Voltage: ${voltageValue}"
+                        else -> textViewVoltage.text = "Voltage: No data available"
+                    }
+
+                    // Handle the Battery Percentage data fetched from the Realtime Database
+                    val batteryPercentageValue = dataSnapshot.child("Battery Percentage").getValue()
+                    Log.d(TAG, "Battery Percentage value is: $batteryPercentageValue")
+
+                    // Update the TextView with the fetched Battery Percentage data
+                    when (batteryPercentageValue) {
+                        is Long -> textViewBatteryPercentage.text = "Battery Percentage: ${batteryPercentageValue}"
+                        is Double -> textViewBatteryPercentage.text = "Battery Percentage: ${batteryPercentageValue}"
+                        else -> textViewBatteryPercentage.text = "Battery Percentage: No data available"
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to read value.", e)
@@ -61,3 +74,4 @@ class MainActivity : AppCompatActivity() {
         private const val TAG = "MainActivity"
     }
 }
+
